@@ -18,7 +18,7 @@ except Exception as e:
 try:
     llm_client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
-        api_key="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",
+        api_key="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",
     )
 except Exception as e:
     print(f"Failed to initialize OpenAI client for OpenRouter: {e}")
@@ -27,11 +27,10 @@ except Exception as e:
 def get_llm_response(query_text, screenshot_uri):
     if not llm_client:
         return "LLM client is not initialized."
-
+    
     try:
         completion = llm_client.chat.completions.create(
-            extra_headers={ "HTTP-Referer": "http://localhost:3000", "X-Title": "Murf Vision Assistant" },
-            model="google/gemma-3-4b-it:free", # A fast and capable model
+            model="google/gemma-3-12b-it:free", # A fast and capable model
             messages=[
                 {
                     "role": "user",

@@ -5,20 +5,23 @@ from rest_framework.response import Response
 from rest_framework import status
 import os
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv() 
 
 # --- Initialize the Murf client with the hardcoded API key ---
 # Replace "YOUR_API_KEY" with your actual Murf AI API key
 try:
-    client = Murf(api_key="ap2_80180134-95ec-41f8-accd-d20691c64591")
+    client = Murf(api_key= os.getenv('MURFACE_API_KEY'))
 except Exception as e:
     print(f"Failed to initialize Murf client: {e}")
     client = None
 
 # --- OpenRouter (LLM) Client Initialization ---
 try:
+    key = os.getenv('OPENROUTER_API_KEY')
     llm_client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
-        api_key="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",
+        api_key= os.getenv('OPENROUTER_API_KEY'),
     )
 except Exception as e:
     print(f"Failed to initialize OpenAI client for OpenRouter: {e}")

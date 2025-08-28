@@ -1,61 +1,99 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const analyzeButton = document.getElementById('analyze-button');
-    const queryInput = document.getElementById('query-input');
+    const micButton = document.getElementById('mic-button');
     const statusText = document.getElementById('status-text');
 
-    analyzeButton.addEventListener('click', async () => {
-        const query = queryInput.value;
+    // --- Speech Recognition Setup ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        statusText.textContent = "Sorry, your browser doesn't support speech recognition.";
+        micButton.disabled = true;
+        return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false; // We want it to stop when the user stops talking
+    recognition.interimResults = true;
+    let finalTranscript = '';
+    let isRecording = false;
 
-        if (!query) {
-            statusText.textContent = 'Please enter a question.';
-            return;
+    recognition.onstart = () => {
+        statusText.textContent = 'Listening...';
+        finalTranscript = '';
+    };
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
         }
+        statusText.textContent = finalTranscript + interimTranscript;
+    };
 
+    // This is the key part: when speech ends, we send the data to the backend
+    recognition.onend = () => {
+        isRecording = false;
+        micButton.classList.remove('recording');
+        if (finalTranscript) {
+            takeScreenshotAndSend(finalTranscript);
+        } else {
+            statusText.textContent = 'Could not hear you. Please try again.';
+        }
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        statusText.textContent = 'An error occurred during speech recognition.';
+    };
+
+    // --- Button Click Handler ---
+    micButton.addEventListener('click', () => {
+        isRecording = !isRecording;
+        if (isRecording) {
+            micButton.classList.add('recording');
+            recognition.start();
+        } else {
+            micButton.classList.remove('recording');
+            recognition.stop();
+        }
+    });
+
+    // --- Backend Communication Function ---
+    async function takeScreenshotAndSend(queryText) {
         statusText.textContent = 'Taking screenshot...';
         
         try {
-            // 1. Capture the visible tab as a data URL (JPEG)
-            const screenshotDataUrl = await chrome.tabs.captureVisibleTab(null, {
-                format: 'jpeg',
-                quality: 90
-            });
+            const screenshotDataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'jpeg', quality: 90 });
 
             statusText.textContent = 'Analyzing...';
             
-            // 2. Send data to the backend
             const response = await fetch('http://127.0.0.1:8000/api/process-query/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    screenshot: screenshotDataUrl, // Send the data URL directly
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: queryText, screenshot: screenshotDataUrl }),
             });
 
-            if (!response.ok) {
-                throw new Error(`Server responded with status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
             const data = await response.json();
             
-            // 3. Play the audio response
             if (data.audioUrl) {
                 statusText.textContent = 'Playing response...';
                 const audio = new Audio(data.audioUrl);
                 audio.play();
                 audio.onended = () => {
-                   statusText.textContent = ''; // Clear status when done
-                   window.close(); // Close popup after playing
+                    statusText.textContent = '';
+                    window.close();
                 };
             } else {
-                throw new Error('No audio URL received from server.');
+                throw new Error('No audio URL in response.');
             }
 
         } catch (error) {
             console.error('Error:', error);
             statusText.textContent = 'An error occurred. See console.';
         }
-    });
+    }
 });

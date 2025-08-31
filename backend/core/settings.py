@@ -26,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-pl76+ob#g&@pa-t$7r054-f(sdwho8qj24&(i$yils)$zpy^mm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['127.0..1','https://murf-ai-vision.onrender.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition

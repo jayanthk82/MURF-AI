@@ -2,6 +2,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const micButton = document.getElementById('mic-button');
     const statusText = document.getElementById('status-text');
 
+    // --- New Helper Function to toggle the visual effect ---
+    function togglePageEffect(enable) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0] && tabs[0].id) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    func: (isEnabled) => {
+                        document.documentElement.classList.toggle('murf-vision-active', isEnabled);
+                    },
+                    args: [enable]
+                });
+            }
+        });
+    }
+
+    // --- Turn ON the effect when the popup opens ---
+    togglePageEffect(true);
+
     // --- Speech Recognition Setup ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -10,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     const recognition = new SpeechRecognition();
-    recognition.continuous = false; // We want it to stop when the user stops talking
+    recognition.continuous = false;
     recognition.interimResults = true;
     let finalTranscript = '';
     let isRecording = false;
@@ -32,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText.textContent = finalTranscript + interimTranscript;
     };
 
-    // This is the key part: when speech ends, we send the data to the backend
     recognition.onend = () => {
         isRecording = false;
         micButton.classList.remove('recording');
@@ -40,15 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
             takeScreenshotAndSend(finalTranscript);
         } else {
             statusText.textContent = 'Could not hear you. Please try again.';
+            togglePageEffect(false); // Turn off effect if there's no speech
         }
     };
     
     recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         statusText.textContent = 'An error occurred during speech recognition.';
+        togglePageEffect(false); // Turn off effect on error
     };
 
-    // --- Button Click Handler ---
     micButton.addEventListener('click', () => {
         isRecording = !isRecording;
         if (isRecording) {
@@ -60,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Backend Communication Function ---
     async function takeScreenshotAndSend(queryText) {
         statusText.textContent = 'Taking screenshot...';
         
@@ -84,7 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const audio = new Audio(data.audioUrl);
                 audio.play();
                 audio.onended = () => {
-                    statusText.textContent = '';
+                    // --- Turn OFF the effect when the audio is done ---
+                    togglePageEffect(false);
                     window.close();
                 };
             } else {
@@ -94,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             statusText.textContent = 'An error occurred. See console.';
+            // --- Turn OFF the effect if there's a backend error ---
+            togglePageEffect(false);
         }
     }
 });

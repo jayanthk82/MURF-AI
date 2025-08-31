@@ -61,7 +61,7 @@ async function takeScreenshotAndSend() {
   const canvas = await html2canvas(screenshotTarget);
   const screenshotData = canvas.toDataURL('image/jpeg');
 
-  const response = await fetch('http://127.0.0.1:8000/api/process-query/', {
+  const response = await fetch('https://murf-ai-eh9w.onrender.com/api/process-query/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

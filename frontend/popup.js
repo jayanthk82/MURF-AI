@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             statusText.textContent = 'Analyzing...';
             
-            const response = await fetch('http://127.0.0.1:8000/api/process/', {
+            const response = await fetch('https://murf-ai-5htp.onrender.com', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: queryText, screenshot: screenshotDataUrl }),

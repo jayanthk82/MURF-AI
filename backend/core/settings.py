@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv   #type: ignore
 from pathlib import Path
 
 load_dotenv()
@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-pl76+ob#g&@pa-t$7r054-f(sdwho8qj24&(i$yils)$zpy^mm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['murf-ai-eh9w.onrender.com']
+ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME', '*')]
 
 
 # Application definition
@@ -126,6 +126,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR) # Replace with your folder's name
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

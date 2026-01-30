@@ -1,12 +1,15 @@
 # backend/api/views.py
-from murf.client import Murf
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+from murf.client import Murf    #type: ignore
+from rest_framework.views import APIView  #type: ignore
+from rest_framework.response import Response   #type: ignore
+from rest_framework import status  #type: ignore
 import os
-from openai import OpenAI
-from dotenv import load_dotenv
-load_dotenv() 
+from openai import OpenAI   #type: ignore
+from dotenv import load_dotenv   #type: ignore
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny
+
+load_dotenv()  
 
 # --- Initialize the Murf client with the hardcoded API key ---
 # Replace "YOUR_API_KEY" with your actual Murf AI API key

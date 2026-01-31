@@ -8,7 +8,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "murf-ai-eh9w.onrender.com"
+    "https://murf-ai-5htp.onrender.com/*"
   ],
   "action": {
     "default_popup": "popup.html",

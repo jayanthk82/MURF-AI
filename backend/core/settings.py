@@ -28,8 +28,9 @@ SECRET_KEY = 'django-insecure-pl76+ob#g&@pa-t$7r054-f(sdwho8qj24&(i$yils)$zpy^mm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["https://murf-ai-5htp.onrender.com"]
-
+ALLOWED_HOSTS = [".onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 

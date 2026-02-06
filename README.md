@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Murf AI Vision-Based Voice Assistant
 
 <img width="800" alt="Murf AI Banner" src="https://github.com/user-attachments/assets/8f5da248-840a-4990-bd66-22527bf6bf51" />
